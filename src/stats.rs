@@ -7,6 +7,8 @@ use bandwidth::*;
 use log::info;
 use tokio::time;
 
+pub use bandwidth::RandomBandwidthProvider;
+
 #[derive(Debug, Default)]
 pub struct NodeStats {
     pub bandwidth: Arc<Bandwidth>,
@@ -21,14 +23,14 @@ pub struct NodeStatsProvider {
 }
 
 impl NodeStatsProvider {
-    pub fn new() -> Self {
+    pub fn new(updaters: Vec<Box<dyn NodeStatsUpdater>>) -> Self {
         let shared_node_stats = Arc::new(RwLock::new(Arc::new(Default::default())));
 
         let provider = Self {
             node_stats: Arc::clone(&shared_node_stats),
         };
 
-        start_update_loop(Arc::downgrade(&shared_node_stats));
+        start_update_loop(Arc::downgrade(&shared_node_stats), updaters);
 
         provider
     }
@@ -38,15 +40,19 @@ impl NodeStatsProvider {
     }
 }
 
-fn start_update_loop(node_stats: Weak<RwLock<Arc<NodeStats>>>) {
+fn start_update_loop(
+    node_stats: Weak<RwLock<Arc<NodeStats>>>,
+    updaters: Vec<Box<dyn NodeStatsUpdater>>,
+) {
     info!("Start NodeStatsProvider update loop");
 
-    tokio::spawn(async move { update_loop(node_stats).await });
+    tokio::spawn(async move { update_loop(node_stats, updaters).await });
 }
 
-async fn update_loop(node_stats: Weak<RwLock<Arc<NodeStats>>>) {
-    let updaters: &Vec<Box<dyn NodeStatsUpdater>> = &vec![Box::new(RandomBandwidthProvider::new())];
-
+async fn update_loop(
+    node_stats: Weak<RwLock<Arc<NodeStats>>>,
+    updaters: Vec<Box<dyn NodeStatsUpdater>>,
+) {
     let mut interval = time::interval(Duration::from_secs(1));
 
     loop {
@@ -59,7 +65,7 @@ async fn update_loop(node_stats: Weak<RwLock<Arc<NodeStats>>>) {
         };
 
         let mut new_node_stats: NodeStats = Default::default();
-        for updater in updaters {
+        for updater in &updaters {
             new_node_stats = updater.update_node_stats(new_node_stats);
         }
 
