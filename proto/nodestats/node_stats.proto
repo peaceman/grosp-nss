@@ -1,0 +1,17 @@
+syntax = "proto3";
+package nodestats;
+
+message NodeStats {
+    Bandwidth used_bandwidth = 1;
+}
+
+message Bandwidth {
+    uint64 tx_bps = 1;
+    uint64 rx_bps = 2;
+}
+
+message LiveNodeStatsRequest {}
+
+service NodeStatsService {
+    rpc GetLiveStats(LiveNodeStatsRequest) returns (stream NodeStats);
+}
