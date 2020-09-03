@@ -1,15 +1,17 @@
 mod bandwidth;
 
 use std::sync::{Arc, RwLock, Weak};
-use std::time::Duration;
+use std::fmt;
+
+use log::info;
+use tokio::sync::watch::Receiver;
 
 use bandwidth::*;
-use log::info;
-use tokio::time;
+use crate::util::TraitDisplay;
 
 pub use bandwidth::RandomBandwidthProvider;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct NodeStats {
     pub bandwidth: Arc<Bandwidth>,
 }
@@ -18,12 +20,28 @@ pub trait NodeStatsUpdater: Send + Sync {
     fn update_node_stats(&self, node_stats: NodeStats) -> NodeStats;
 }
 
+pub trait NodeStatsUpdateNotifier: Send + Sync {
+    fn get_update_channel_receiver(&self) -> Receiver<()>;
+}
+
+pub trait NodeStatsDataSource: NodeStatsUpdater + NodeStatsUpdateNotifier {
+    fn get_name(&self) -> &'static str;
+}
+
+impl<'a, T> fmt::Display for TraitDisplay<'a, T>
+where T: NodeStatsDataSource + ?Sized
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.get_name())
+    }
+}
+
 pub struct NodeStatsProvider {
     node_stats: Arc<RwLock<Arc<NodeStats>>>,
 }
 
 impl NodeStatsProvider {
-    pub fn new(updaters: Vec<Box<dyn NodeStatsUpdater>>) -> Self {
+    pub fn new(updaters: Vec<Box<dyn NodeStatsDataSource>>) -> Self {
         let shared_node_stats = Arc::new(RwLock::new(Arc::new(Default::default())));
 
         let provider = Self {
@@ -42,35 +60,43 @@ impl NodeStatsProvider {
 
 fn start_update_loop(
     node_stats: Weak<RwLock<Arc<NodeStats>>>,
-    updaters: Vec<Box<dyn NodeStatsUpdater>>,
+    updaters: Vec<Box<dyn NodeStatsDataSource>>,
 ) {
     info!("Start NodeStatsProvider update loop");
 
-    tokio::spawn(async move { update_loop(node_stats, updaters).await });
+    for updater in updaters {
+        let mut update_notification_rx = updater.get_update_channel_receiver();
+        let node_stats = node_stats.clone();
+
+        tokio::spawn(async move {
+            loop {
+                if await_update_notification(&mut update_notification_rx, updater.as_ref()).await.is_none() {
+                    break;
+                }
+
+                let node_stats = match node_stats.upgrade() {
+                    Some(node_stats) => node_stats,
+                    None => {
+                        info!("Couldn't get a reference to the node stats storage, ending update loop, updater: {}", TraitDisplay(updater.as_ref()));
+                        break;
+                    }
+                };
+
+                let mut ns_lock_guard = node_stats.write().unwrap();
+                *ns_lock_guard = Arc::new(updater.update_node_stats((**ns_lock_guard).clone()));
+            }
+        });
+    }
+
+    info!("Finished NodeStatsProvider update loop");
 }
 
-async fn update_loop(
-    node_stats: Weak<RwLock<Arc<NodeStats>>>,
-    updaters: Vec<Box<dyn NodeStatsUpdater>>,
-) {
-    let mut interval = time::interval(Duration::from_secs(1));
-
-    loop {
-        let node_stats = match node_stats.upgrade() {
-            Some(node_stats) => node_stats,
-            None => {
-                info!("Couldn't get a reference to the node stats storage, ending update loop");
-                break;
-            }
-        };
-
-        let mut new_node_stats: NodeStats = Default::default();
-        for updater in &updaters {
-            new_node_stats = updater.update_node_stats(new_node_stats);
-        }
-
-        *node_stats.write().unwrap() = Arc::new(new_node_stats);
-
-        interval.tick().await;
+async fn await_update_notification<T: NodeStatsDataSource + ?Sized>(channel: &mut Receiver<()>, updater: &T) -> Option<()> {
+    if channel.recv().await.is_none() {
+        info!("Received none over the update notification channel from {}, stop listening", TraitDisplay(updater));
+        None
+    } else {
+        info!("Received updater notification from {}", TraitDisplay(updater));
+        Some(())
     }
 }

@@ -46,6 +46,8 @@ impl proto::node_stats_service_server::NodeStatsService for NodeStatsService {
                 if let Err(e) = send_result {
                     info!("Failed to send live stats, stopping live stats streaming for client {:?}, SendError: {:?}", request.remote_addr(), e);
                     break;
+                } else {
+                    info!("Sent live stats to client {:?}", request.remote_addr());
                 }
 
                 interval.tick().await;
