@@ -3,7 +3,7 @@ pub mod bandwidth;
 use serde::Deserialize;
 
 use super::SettingsError;
-use bandwidth::{PartialBandwidth, Bandwidth};
+use bandwidth::{Bandwidth, PartialBandwidth};
 
 #[derive(Debug)]
 pub struct NodeStats {
@@ -32,8 +32,6 @@ pub struct PartialNodeStats {
 
 impl Default for PartialNodeStats {
     fn default() -> Self {
-        PartialNodeStats {
-            bandwidth: None
-        }
+        PartialNodeStats { bandwidth: None }
     }
 }

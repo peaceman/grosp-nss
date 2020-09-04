@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::net::{SocketAddr};
+use std::net::SocketAddr;
 
 use super::SettingsError;
 

@@ -1,5 +1,5 @@
-use std::time::Duration;
 use std::rc::Rc;
+use std::time::Duration;
 
 use serde::Deserialize;
 
@@ -14,16 +14,21 @@ pub struct Bandwidth {
 
 impl Bandwidth {
     pub fn new(sources: Vec<PartialBandwidth>) -> Result<Self, SettingsError> {
-        let merged: PartialBandwidth = sources
-            .iter()
-            .fold(Default::default(), |acc, x| PartialBandwidth {
-                tx_file: acc.tx_file.or_else(|| x.tx_file.clone()),
-                rx_file: acc.rx_file.or_else(|| x.rx_file.clone()),
-                update_interval: acc.update_interval.or(x.update_interval),
-            });
+        let merged: PartialBandwidth =
+            sources
+                .iter()
+                .fold(Default::default(), |acc, x| PartialBandwidth {
+                    tx_file: acc.tx_file.or_else(|| x.tx_file.clone()),
+                    rx_file: acc.rx_file.or_else(|| x.rx_file.clone()),
+                    update_interval: acc.update_interval.or(x.update_interval),
+                });
 
-        let mut tx_file = merged.tx_file.ok_or_else(|| SettingsError::MissingValue("bandwidth.tx_file".into()))?;
-        let mut rx_file = merged.rx_file.ok_or_else(|| SettingsError::MissingValue("bandwidth.rx_file".into()))?;
+        let mut tx_file = merged
+            .tx_file
+            .ok_or_else(|| SettingsError::MissingValue("bandwidth.tx_file".into()))?;
+        let mut rx_file = merged
+            .rx_file
+            .ok_or_else(|| SettingsError::MissingValue("bandwidth.rx_file".into()))?;
 
         Rc::make_mut(&mut tx_file);
         Rc::make_mut(&mut rx_file);
@@ -34,7 +39,9 @@ impl Bandwidth {
         Ok(Bandwidth {
             tx_file,
             rx_file,
-            update_interval: merged.update_interval.ok_or_else(|| SettingsError::MissingValue("bandwidth.update_interval".into()))?,
+            update_interval: merged
+                .update_interval
+                .ok_or_else(|| SettingsError::MissingValue("bandwidth.update_interval".into()))?,
         })
     }
 }

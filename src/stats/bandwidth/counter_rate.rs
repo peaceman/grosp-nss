@@ -150,7 +150,10 @@ fn calc_bandwidth(
 
     let elapsed = current_time.duration_since(last_time);
     if elapsed.as_secs() == 0 {
-        trace!("Duration since last calculation is less than a second {:?}", elapsed.as_millis());
+        trace!(
+            "Duration since last calculation is less than a second {:?}",
+            elapsed.as_millis()
+        );
         return None;
     }
 

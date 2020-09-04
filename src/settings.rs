@@ -4,8 +4,8 @@ mod node_stats;
 
 use error::*;
 use http::*;
-use node_stats::*;
 use node_stats::bandwidth::*;
+use node_stats::*;
 
 use std::fs::File;
 use std::io::Read;
@@ -79,7 +79,7 @@ impl Default for PartialSettings {
                     tx_file: None,
                     rx_file: None,
                     update_interval: Some(Duration::from_secs(5)),
-                })
+                }),
             }),
         }
     }
