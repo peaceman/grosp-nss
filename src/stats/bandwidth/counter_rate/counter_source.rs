@@ -20,13 +20,17 @@ impl FileCounterSource {
             tx_file: tx_file.into(),
         }
     }
+
+    fn parse_number(content: &str) -> Result<u64, std::num::ParseIntError> {
+        content.trim().parse()
+    }
 }
 
 impl CounterSource for FileCounterSource {
     fn get_rx(&self) -> u64 {
         fs::read_to_string(&self.rx_file)
             .map_err(anyhow::Error::new)
-            .and_then(|file_content| file_content.parse().map_err(anyhow::Error::new))
+            .and_then(|file_content| Self::parse_number(&file_content).map_err(anyhow::Error::new))
             .unwrap_or_else(|e| {
                 warn!("Failed to get rx value from file: {:?}", e);
 
@@ -37,7 +41,7 @@ impl CounterSource for FileCounterSource {
     fn get_tx(&self) -> u64 {
         fs::read_to_string(&self.tx_file)
             .map_err(anyhow::Error::new)
-            .and_then(|file_content| file_content.parse().map_err(anyhow::Error::new))
+            .and_then(|file_content| Self::parse_number(&file_content).map_err(anyhow::Error::new))
             .unwrap_or_else(|e| {
                 warn!("Failed to get rx value from file: {:?}", e);
 
@@ -109,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_regular() {
-        let rx_file = TestFile::new("23").unwrap();
+        let rx_file = TestFile::new("23\n").unwrap();
         let tx_file = TestFile::new("5").unwrap();
 
         let source = FileCounterSource::new(rx_file.file_path.as_ref(), tx_file.file_path.as_ref());
