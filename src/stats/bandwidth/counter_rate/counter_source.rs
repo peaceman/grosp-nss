@@ -14,7 +14,7 @@ pub struct FileCounterSource {
 }
 
 impl FileCounterSource {
-    fn new<T: Into<PathBuf>>(rx_file: T, tx_file: T) -> Self {
+    pub fn new<T: Into<PathBuf>>(rx_file: T, tx_file: T) -> Self {
         FileCounterSource {
             rx_file: rx_file.into(),
             tx_file: tx_file.into(),

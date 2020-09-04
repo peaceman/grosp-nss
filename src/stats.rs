@@ -1,4 +1,4 @@
-mod bandwidth;
+pub mod bandwidth;
 
 use std::fmt;
 use std::sync::{Arc, RwLock, Weak};
@@ -8,8 +8,6 @@ use tokio::sync::watch::Receiver;
 
 use crate::util::TraitDisplay;
 use bandwidth::*;
-
-pub use bandwidth::RandomBandwidthProvider;
 
 #[derive(Debug, Default, Clone)]
 pub struct NodeStats {

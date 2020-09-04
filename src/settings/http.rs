@@ -1,19 +1,11 @@
 use serde::Deserialize;
-use std::net::{IpAddr, Ipv6Addr, SocketAddr};
+use std::net::{SocketAddr};
 
 use super::SettingsError;
 
 #[derive(Debug)]
 pub struct Http {
     pub socket: SocketAddr,
-}
-
-impl Default for Http {
-    fn default() -> Self {
-        Self {
-            socket: SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 2351),
-        }
-    }
 }
 
 impl Http {

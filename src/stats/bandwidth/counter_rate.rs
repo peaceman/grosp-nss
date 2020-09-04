@@ -1,4 +1,4 @@
-mod counter_source;
+pub mod counter_source;
 
 use std::sync::{Arc, RwLock, Weak};
 use std::time::{Duration, Instant};
@@ -148,12 +148,13 @@ fn calc_bandwidth(
         return None;
     }
 
-    let duration_in_s = current_time.duration_since(last_time).as_secs();
-
-    if duration_in_s == 0 {
-        trace!("Duration since last calculation is less than a second");
+    let elapsed = current_time.duration_since(last_time);
+    if elapsed.as_secs() == 0 {
+        trace!("Duration since last calculation is less than a second {:?}", elapsed.as_millis());
         return None;
     }
+
+    let duration_in_s = elapsed.as_secs();
 
     let rx_diff = current_counter_values.rx - last_counter_values.rx;
     let tx_diff = current_counter_values.tx - last_counter_values.tx;

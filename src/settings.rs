@@ -1,17 +1,23 @@
 mod error;
 mod http;
+mod node_stats;
 
 use error::*;
 use http::*;
+use node_stats::*;
+use node_stats::bandwidth::*;
 
 use std::fs::File;
 use std::io::Read;
+use std::net::{IpAddr, Ipv6Addr, SocketAddr};
+use std::time::Duration;
 
 use serde::Deserialize;
 
 #[derive(Debug)]
 pub struct Settings {
     pub http: Http,
+    pub node_stats: NodeStats,
 }
 
 impl Settings {
@@ -42,8 +48,16 @@ impl Settings {
             .map(|s| s.unwrap())
             .collect();
 
+        let node_stats_sources = sources
+            .iter_mut()
+            .map(|s| s.node_stats.take())
+            .filter(|s| s.is_some())
+            .map(|s| s.unwrap())
+            .collect();
+
         Ok(Settings {
             http: Http::new(http_sources)?,
+            node_stats: NodeStats::new(node_stats_sources)?,
         })
     }
 }
@@ -51,12 +65,22 @@ impl Settings {
 #[derive(Debug, Deserialize)]
 pub struct PartialSettings {
     http: Option<PartialHttp>,
+    node_stats: Option<PartialNodeStats>,
 }
 
 impl Default for PartialSettings {
     fn default() -> Self {
         PartialSettings {
-            http: Some(Default::default()),
+            http: Some(PartialHttp {
+                socket: Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 2351)),
+            }),
+            node_stats: Some(PartialNodeStats {
+                bandwidth: Some(PartialBandwidth {
+                    tx_file: None,
+                    rx_file: None,
+                    update_interval: Some(Duration::from_secs(5)),
+                })
+            }),
         }
     }
 }

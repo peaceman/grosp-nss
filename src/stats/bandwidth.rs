@@ -5,6 +5,8 @@ use std::sync::Arc;
 
 use super::{NodeStats, NodeStatsUpdater};
 
+pub use counter_rate::counter_source::FileCounterSource;
+pub use counter_rate::CounterRateBandwidthProvider;
 pub use random::RandomBandwidthProvider;
 
 #[derive(Debug, PartialEq)]

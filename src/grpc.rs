@@ -36,6 +36,7 @@ impl proto::node_stats_service_server::NodeStatsService for NodeStatsService {
                 request.remote_addr()
             );
             let mut interval = time::interval(Duration::from_secs(1));
+            interval.tick().await; // the first tick completes immediately
 
             loop {
                 let node_stats = node_stats_provider.current_node_stats();
