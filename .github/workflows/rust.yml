@@ -43,9 +43,6 @@ jobs:
       - name: Set TMPDIR
         run: echo ::set-env name=TMPDIR::$GITHUB_WORKSPACE
 
-      - name: Debug env
-        run: env
-
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
