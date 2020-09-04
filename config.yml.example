@@ -1,0 +1,9 @@
+---
+http:
+  socket: "[::]:3332"
+
+node_stats:
+  bandwidth:
+    tx_file: /sys/class/net/eth0/statistics/tx_bytes
+    rx_file: /sys/class/net/eth0/statistics/rx_bytes
+    update_interval: 2s
