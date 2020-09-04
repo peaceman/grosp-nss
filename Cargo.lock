@@ -426,6 +426,7 @@ dependencies = [
 name = "node-stats-service"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "env_logger",
  "log",
  "prost",

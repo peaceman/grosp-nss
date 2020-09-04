@@ -1,4 +1,5 @@
-use std::path::PathBuf;
+mod counter_source;
+
 use std::sync::{Arc, RwLock, Weak};
 use std::time::{Duration, Instant};
 
@@ -8,11 +9,7 @@ use tokio::time;
 
 use super::{Bandwidth, BandwidthProvider};
 use crate::stats::{NodeStatsDataSource, NodeStatsUpdateNotifier};
-
-pub trait CounterSource: Send + Sync {
-    fn get_rx(&self) -> u64;
-    fn get_tx(&self) -> u64;
-}
+use counter_source::CounterSource;
 
 pub struct CounterRateBandwidthProvider {
     bandwidth: Arc<RwLock<Arc<Bandwidth>>>,
