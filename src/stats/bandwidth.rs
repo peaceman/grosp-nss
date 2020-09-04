@@ -1,3 +1,4 @@
+mod counter_rate;
 mod random;
 
 use std::sync::Arc;
@@ -6,7 +7,7 @@ use super::{NodeStats, NodeStatsUpdater};
 
 pub use random::RandomBandwidthProvider;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Bandwidth {
     pub tx_bps: u64,
     pub rx_bps: u64,

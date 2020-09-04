@@ -4,11 +4,11 @@ use std::time::Duration;
 use log::info;
 use rand::thread_rng;
 use rand::Rng;
-use tokio::time;
 use tokio::sync::watch;
+use tokio::time;
 
 use super::{Bandwidth, BandwidthProvider};
-use crate::stats::{NodeStatsUpdateNotifier, NodeStatsDataSource};
+use crate::stats::{NodeStatsDataSource, NodeStatsUpdateNotifier};
 
 pub struct RandomBandwidthProvider {
     bandwidth: Arc<RwLock<Arc<Bandwidth>>>,
