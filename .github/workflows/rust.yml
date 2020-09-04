@@ -40,6 +40,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Debug env
+        run: env
+
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
