@@ -40,6 +40,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Set TMPDIR
+        run: echo ::set-env name=TMPDIR::$GITHUB_WORKSPACE
+
       - name: Debug env
         run: env
 
