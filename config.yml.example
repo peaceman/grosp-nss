@@ -1,6 +1,10 @@
 ---
 http:
   socket: "[::]:3332"
+  tls:
+    server_cert_file:
+    server_key_file:
+    ca_cert_file:
 
 node_stats:
   bandwidth:
