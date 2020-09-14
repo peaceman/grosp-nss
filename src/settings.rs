@@ -73,6 +73,7 @@ impl Default for PartialSettings {
         PartialSettings {
             http: Some(PartialHttp {
                 socket: Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 2351)),
+                tls: None
             }),
             node_stats: Some(PartialNodeStats {
                 bandwidth: Some(PartialBandwidth {
