@@ -40,11 +40,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn build_tls_config(settings: &Settings) -> ServerTlsConfig {
     let tls_settings = &settings.http.tls;
 
-    let cert = tokio::fs::read(&tls_settings.server_cert_file).await.expect("Failed to load server certificate");
-    let key = tokio::fs::read(&tls_settings.server_key_file).await.expect("Failed to load server certificate key");
+    let cert = tokio::fs::read(&tls_settings.server_cert_file)
+        .await
+        .expect("Failed to load server certificate");
+    let key = tokio::fs::read(&tls_settings.server_key_file)
+        .await
+        .expect("Failed to load server certificate key");
     let identity = Identity::from_pem(cert, key);
 
-    let client_ca_cert = tokio::fs::read(&tls_settings.ca_cert_file).await.expect("Failed to load client ca cert");
+    let client_ca_cert = tokio::fs::read(&tls_settings.ca_cert_file)
+        .await
+        .expect("Failed to load client ca cert");
     let client_ca_cert = Certificate::from_pem(client_ca_cert);
 
     ServerTlsConfig::new()

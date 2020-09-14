@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::net::SocketAddr;
 
 use super::SettingsError;
-use tls::{Tls, PartialTls};
+use tls::{PartialTls, Tls};
 
 #[derive(Debug)]
 pub struct Http {
@@ -27,8 +27,7 @@ impl Http {
             .collect();
 
         Ok(Http {
-            socket: socket
-                .ok_or_else(|| SettingsError::MissingValue("http.socket".to_string()))?,
+            socket: socket.ok_or_else(|| SettingsError::MissingValue("http.socket".to_string()))?,
             tls: Tls::new(tls_sources)?,
         })
     }
@@ -42,6 +41,9 @@ pub struct PartialHttp {
 
 impl Default for PartialHttp {
     fn default() -> Self {
-        PartialHttp { socket: None, tls: None }
+        PartialHttp {
+            socket: None,
+            tls: None,
+        }
     }
 }
