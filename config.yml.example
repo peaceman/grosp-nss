@@ -1,6 +1,6 @@
 ---
 http:
-  socket: "[::]:3332"
+  socket: "[::]:40230"
   tls:
     server_cert_file:
     server_key_file:

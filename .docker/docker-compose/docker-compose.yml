@@ -1,0 +1,20 @@
+x-restart-policy: &restart-policy
+  restart: unless-stopped
+
+version: "2.4"
+services:
+  nss:
+    image: $NSS_IMAGE
+    <<: *restart-policy
+    ports:
+      - "40230:40230"
+    volumes:
+      - type: bind
+        source: /sys
+        target: /host/sys
+      - type: bind
+        source: ./config.yml
+        target: /opt/app/config.yml
+      - type: bind
+        source: ./certs
+        target: /certs

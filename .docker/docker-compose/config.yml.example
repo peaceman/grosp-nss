@@ -1,0 +1,12 @@
+http:
+  socket: "[::]:40230"
+  tls:
+    server_cert_file: /certs/edgenode.pem
+    server_key_file: /certs/edgenode-key.pem
+    ca_cert_file: /certs/ca.pem
+
+node_stats:
+  bandwidth:
+    tx_file: /host/sys/class/net/eth0/statistics/tx_bytes
+    rx_file: /host/sys/class/net/eth0/statistics/rx_bytes
+    update_interval: 2s
